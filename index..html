@@ -1,0 +1,223 @@
+<html><head><base href="." />
+<title>Precise Age Calculator</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        color: #fff;
+        padding: 20px;
+    }
+
+    .container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 600px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+        background: linear-gradient(45deg, #00f7ff, #ff00e4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .input-section {
+        margin-bottom: 2rem;
+    }
+
+    input[type="date"] {
+        width: 100%;
+        padding: 1rem;
+        border: none;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    button {
+        width: 100%;
+        padding: 1rem;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(45deg, #00f7ff, #ff00e4);
+        color: #fff;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+    }
+
+    .result-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+    }
+
+    .result-section.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .time-unit {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+        animation: pulse 2s infinite;
+    }
+
+    .number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+
+    @media (max-width: 600px) {
+        .container {
+            padding: 1rem;
+        }
+        
+        .time-unit {
+            padding: 0.8rem;
+        }
+        
+        .number {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1>Precise Age Calculator</h1>
+        <div class="input-section">
+            <input type="date" id="birthdate" max="">
+            <button onclick="calculateAge()">Calculate My Age</button>
+        </div>
+        <div class="result-section" id="result">
+            <div class="time-unit">
+                <div class="number" id="years">0</div>
+                <div class="label">Years</div>
+            </div>
+            <div class="time-unit">
+                <div class="number" id="months">0</div>
+                <div class="label">Months</div>
+            </div>
+            <div class="time-unit">
+                <div class="number" id="days">0</div>
+                <div class="label">Days</div>
+            </div>
+            <div class="time-unit">
+                <div class="number" id="hours">0</div>
+                <div class="label">Hours</div>
+            </div>
+            <div class="time-unit">
+                <div class="number" id="minutes">0</div>
+                <div class="label">Minutes</div>
+            </div>
+            <div class="time-unit">
+                <div class="number" id="seconds">0</div>
+                <div class="label">Seconds</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set max date to today
+        document.getElementById('birthdate').max = new Date().toISOString().split('T')[0];
+        
+        let intervalId = null;
+
+        function calculateAge() {
+            const birthDate = new Date(document.getElementById('birthdate').value);
+            
+            if (isNaN(birthDate.getTime())) {
+                alert('Please enter a valid date');
+                return;
+            }
+
+            // Clear any existing interval
+            if (intervalId) clearInterval(intervalId);
+
+            // Show results section with animation
+            const resultSection = document.getElementById('result');
+            resultSection.classList.add('visible');
+
+            // Update time every second
+            updateAge(birthDate);
+            intervalId = setInterval(() => updateAge(birthDate), 1000);
+        }
+
+        function updateAge(birthDate) {
+            const now = new Date();
+            const diff = now - birthDate;
+
+            // Basic calculations
+            const years = now.getFullYear() - birthDate.getFullYear();
+            const months = now.getMonth() - birthDate.getMonth();
+            const days = now.getDate() - birthDate.getDate();
+            
+            // More precise calculations
+            let ageDate = new Date(diff);
+            let hours = now.getHours() - birthDate.getHours();
+            let minutes = now.getMinutes() - birthDate.getMinutes();
+            let seconds = now.getSeconds() - birthDate.getSeconds();
+
+            // Adjust for negative values
+            if (seconds < 0) {
+                seconds += 60;
+                minutes--;
+            }
+            if (minutes < 0) {
+                minutes += 60;
+                hours--;
+            }
+            if (hours < 0) {
+                hours += 24;
+            }
+
+            // Update DOM
+            document.getElementById('years').textContent = Math.abs(years);
+            document.getElementById('months').textContent = Math.abs(months);
+            document.getElementById('days').textContent = Math.abs(days);
+            document.getElementById('hours').textContent = Math.abs(hours);
+            document.getElementById('minutes').textContent = Math.abs(minutes);
+            document.getElementById('seconds').textContent = Math.abs(seconds);
+        }
+    </script>
+</body></html>
